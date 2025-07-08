@@ -18,7 +18,6 @@ const corsOptions = {
       'http://localhost:8081',       // Local development
       'http://localhost:19006',     // Expo web
       'exp://192.168.*.*:19000',    // Expo mobile (LAN)
-      'https://your-production-app.com' // Your production frontend
     ];
     
     if (allowedOrigins.some(allowedOrigin => origin.startsWith(allowedOrigin))) {
