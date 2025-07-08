@@ -4,10 +4,40 @@ import {db} from './config/db.js';
 import { favoritesTable } from './db/schema.js';
 import { and, eq } from 'drizzle-orm';
 import job from './config/cron.js';
+import cors from 'cors';
 
 const app = express()
 const PORT = ENV.PORT || 5001
 if(ENV.NODE_ENV==='production')job.start()
+const corsOptions = {
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    const allowedOrigins = [
+      'http://localhost:8081',       // Local development
+      'http://localhost:19006',     // Expo web
+      'exp://192.168.*.*:19000',    // Expo mobile (LAN)
+      'https://your-production-app.com' // Your production frontend
+    ];
+    
+    if (allowedOrigins.some(allowedOrigin => origin.startsWith(allowedOrigin))) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  methods: ['GET', 'POST', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
+};
+
+// Apply CORS middleware
+app.use(cors(corsOptions));
+
+// Handle preflight requests
+app.options('*', cors(corsOptions));
+
 app.use(express.json())
 
 app.get("/api/favorites/:userId", async (req, res) => {
