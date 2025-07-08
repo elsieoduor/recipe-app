@@ -14,13 +14,12 @@ if (ENV.NODE_ENV === 'production') job.start();
 
 const corsOptions = {
   origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
     
     const allowedOrigins = [
-      'http://localhost:8081',       // Local development
-      'http://localhost:19006',      // Expo web
-      /^exp:\/\/192\.168\.\d{1,3}\.\d{1,3}:19000$/, // Expo mobile (LAN) - using regex
+      'http://localhost:8081',
+      'http://localhost:19006',
+      /^exp:\/\/192\.168\.\d{1,3}\.\d{1,3}:19000$/,
     ];
     
     if (allowedOrigins.some(allowedOrigin => 
@@ -47,16 +46,15 @@ app.options('*', cors(corsOptions));
 app.use(express.json());
 
 // Health check endpoint
-app.get("/api/health", (req, res) => {
+app.get('/api/health', (req, res) => {
   res.status(200).json({ success: true });
 });
 
-// Get user favorites
-app.get("/api/favorites/:userId", async (req, res) => {
+// Get user favorites - fixed path parameter syntax
+app.get('/api/favorites/:userId', async (req, res) => {
   try {
     const { userId } = req.params;
     
-    // Validate userId
     if (!userId || typeof userId !== 'string') {
       return res.status(400).json({ error: "Invalid user ID" });
     }
@@ -73,18 +71,12 @@ app.get("/api/favorites/:userId", async (req, res) => {
 });
 
 // Add new favorite
-app.post("/api/favorites", async (req, res) => {
+app.post('/api/favorites', async (req, res) => {
   try {
     const { userId, recipeId, title, image, cookTime, servings } = req.body;
 
-    // Validate required fields
     if (!userId || !recipeId || !title) {
       return res.status(400).json({ error: "Missing required fields" });
-    }
-
-    // Validate types
-    if (typeof userId !== 'string' || typeof recipeId !== 'number' || typeof title !== 'string') {
-      return res.status(400).json({ error: "Invalid field types" });
     }
 
     const newFavorite = await db.insert(favoritesTable)
@@ -101,22 +93,15 @@ app.post("/api/favorites", async (req, res) => {
     res.status(201).json(newFavorite[0]);
   } catch (error) {
     console.error("Error adding favorite:", error);
-    
-    // Handle duplicate entry case
-    if (error.code === '23505') { // PostgreSQL unique violation
-      return res.status(409).json({ error: "Recipe already in favorites" });
-    }
-    
     res.status(500).json({ error: "Something went wrong" });
   }
 }); 
 
-// Remove favorite
-app.delete("/api/favorites/:userId/:recipeId", async (req, res) => {
+// Remove favorite - fixed path parameter syntax
+app.delete('/api/favorites/:userId/:recipeId', async (req, res) => {
   try {
     const { userId, recipeId } = req.params;
     
-    // Validate parameters
     if (!userId || !recipeId) {
       return res.status(400).json({ error: "Missing parameters" });
     }
