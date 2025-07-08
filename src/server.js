@@ -39,6 +39,9 @@ app.options('*', cors(corsOptions));
 
 app.use(express.json())
 
+app.get("/api/health", (req, res) => {
+  res.status(200).json({ success: true });
+});
 app.get("/api/favorites/:userId", async (req, res) => {
     try {
        const {userId} = req.params;
